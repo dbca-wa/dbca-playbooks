@@ -1,0 +1,4 @@
+libssl_package_name: libssl1.0.0
+sshd_package_name: openssh-server
+sshd_service_name: ssh
+sftp_path: /usr/lib/openssh/sftp-server

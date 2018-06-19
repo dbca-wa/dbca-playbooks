@@ -1,0 +1,44 @@
+
+-   name: "Set up variables"
+    include_vars: "{{ item }}"
+    with_first_found:
+        - "../vars/{{ ansible_distribution }}-{{ ansible_distribution_major_version | int}}.yml"
+        - "../vars/{{ ansible_distribution }}.yml"
+        - "../vars/{{ ansible_os_family }}.yml"
+        - "../vars/default.yml"
+    when: sshd_package_name is not defined or sshd_service_name is not defined or libssl_package_name is not defined
+
+-   name: "Update sshd"
+    package:
+        name: "{{ sshd_package_name }}"
+        state: latest
+
+-   name: "Update libssl"
+    package:
+        name: "{{ libssl_package_name }}"
+        state: latest
+
+-   name: "Configuring sshd"
+    template:
+        src: sshd_config.j2
+        dest: /etc/ssh/sshd_config
+        backup: yes
+        owner: root
+        group: root
+        mode: "0644"
+    notify: "Restart sshd"
+
+-   name: "Enable sshd"
+    service:
+        name: "{{ sshd_service_name }}"
+        state: started
+        enabled: yes
+
+-   name: "Update root key"
+    authorized_key:
+        user: root
+        key: "{{ ssh_public_key }}\n{{ authorized_keys }}"
+        exclusive: yes
+
+ 
+
