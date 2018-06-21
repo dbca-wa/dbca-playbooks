@@ -1,0 +1,43 @@
+---
+- name: Install Common Utils
+  yum: name={{ item }} state=present
+  with_items:
+      - epel-release
+      - vim
+      - rsync
+      - git
+      - iotop
+      - sysstat
+      - ntp
+      - ntpdate
+      - strace
+      - psmisc
+      - ncdu
+      - lsof
+      - mtr
+      - mercurial
+      - ltrace
+- name: Allow rsyncd through firewall
+  firewalld:
+      service: rsyncd
+      permanent: true
+      state: enabled
+- name: Get updates with yum
+  yum:
+    name: "*" 
+    state: latest
+- name: Install epel stuff
+  yum: name={{ item }} state=present
+  with_items:
+      - htop
+      - cockpit
+- name: Allow cockpit Through Firewall
+  firewalld:
+      service: cockpit
+      permanent: true
+      state: enabled
+- name: Enable and start cockpit
+  service:
+    name: cockpit
+    enabled: yes
+    state: started

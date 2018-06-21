@@ -1,0 +1,52 @@
+---
+  - name: Install samba stuff
+    yum: name={{ item }} state=present
+    with_items:
+        - realmd
+        - sssd
+        - sssd-libwbclient
+        - samba-winbind-clients
+        - samba
+        - samba-common
+        - oddjob
+        - oddjob-mkhomedir
+  - name: copy base smb.conf
+    copy:
+      src: /srv/ansible/roles/smb/files/smb.conf
+      dest: /etc/samba/smb.conf
+      owner: root
+      group: root
+      mode: 0644
+      backup: yes
+  - name: enable and start smbd
+    service:
+      name: smb
+      enabled: yes
+      state: started
+  - name: Allow samba through firewall
+    firewalld:
+      service: samba
+      zone: public
+      permanent: true
+      state: enabled
+  - name: copy restic binary
+    copy:
+      src: /srv/ansible/roles/smb/files/restic
+      dest: /usr/local/bin/
+      owner: root
+      group: root
+      mode: 0744
+  - name: copy restic bash completion
+    copy:
+      src: /srv/ansible/roles/smb/files/restic_support/restic
+      dest: /etc/bash_completion.d/restic
+      owner: root
+      group: root
+      mode: 0744
+  - name: copy restic man pages
+    copy:
+      src: /srv/ansible/roles/smb/files/restic_support/manpages/
+      dest: /usr/share/man/man1/
+      owner: root
+      group: root
+      mode: 0744
