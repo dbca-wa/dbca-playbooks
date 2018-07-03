@@ -1,6 +1,6 @@
 # dbca-playbooks
 
-Ansible playbooks to setup various systems for dbca
+Ansible playbooks to deploy server environments for DBCA
 
  * Linux common base
  * Samba
