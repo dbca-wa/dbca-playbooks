@@ -1,0 +1,27 @@
+---
+- name: Install postfix packages
+  package:
+    name: postfix
+    state: present
+
+- name: update configuration file
+  template:
+    src: /srv/ansible/roles/postfix/templates/postfix-main-cf.j2
+    dest: /etc/postfix/main.cf
+    owner: root
+    group: root
+    mode: 0644
+    backup: yes
+
+- name: configure service
+  service:
+    name: postfix
+    enabled: yes
+    state: restarted
+
+- name: configure firewalld (centos)
+  firewalld:
+      service: smtp
+      permanent: true
+      state: enabled
+  when: ansible_os_family == "RedHat"

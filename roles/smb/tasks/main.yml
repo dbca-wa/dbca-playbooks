@@ -29,6 +29,10 @@
       zone: public
       permanent: true
       state: enabled
+  - name: restart firewalld
+    service:
+      name: firewalld
+      state: restarted
   - name: copy restic binary
     copy:
       src: /srv/ansible/roles/smb/files/restic

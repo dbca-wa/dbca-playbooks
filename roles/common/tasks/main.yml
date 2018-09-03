@@ -1,9 +1,37 @@
 ---
-- name: Install Common Utils
+- name: CentOS/RHEL Updates.
+  yum: 
+    update_cache: yes
+    name: "*"
+    state: latest
+  when: >
+    ansible_os_family == 'RedHat'
+
+- name: Deb Updates
+  apt: 
+    update_cache: yes
+    upgrade: yes
+  when: >
+    ansible_os_family == 'Debian'
+
+- name: Install rhel specific packages
   yum: name={{ item }} state=present
   with_items:
-      - epel-release
+      - wget
+      - sysstat
+  when: ansible_os_family == "RedHat"
+
+- name: Get EPEL
+  yum:
+    name: http://dl.fedoraproject.org/pub/epel/7/x86_64/Packages/e/epel-release-7-11.noarch.rpm
+    state: present
+
+
+- name: Install Common Packages
+  package: name={{ item }} state=present
+  with_items:
       - vim
+      - telnet
       - rsync
       - git
       - iotop
@@ -17,27 +45,17 @@
       - mtr
       - mercurial
       - ltrace
+      - htop
+
 - name: Allow rsyncd through firewall
   firewalld:
       service: rsyncd
       permanent: true
       state: enabled
-- name: Get updates with yum
-  yum:
-    name: "*" 
-    state: latest
-- name: Install epel stuff
-  yum: name={{ item }} state=present
-  with_items:
-      - htop
-      - cockpit
-- name: Allow cockpit Through Firewall
-  firewalld:
-      service: cockpit
-      permanent: true
-      state: enabled
-- name: Enable and start cockpit
+  when: ansible_os_family == "RedHat"
+
+- name: restart firewalld
   service:
-    name: cockpit
-    enabled: yes
-    state: started
+    name: firewalld
+    state: restarted
+  when: ansible_os_family == "RedHat"

@@ -4,4 +4,6 @@
     connection: ssh
     roles:
         - ssh
+        - snmp
+        - common
 
