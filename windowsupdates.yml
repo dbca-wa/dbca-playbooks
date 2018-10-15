@@ -1,0 +1,16 @@
+---
+  - name: Install Windows Updates on Servers
+    hosts: windowsprod
+    connection: winrm
+   
+    
+    tasks:
+        - name: Install Updates 
+          win_updates:
+            category_names:
+              - CriticalUpdates
+              - DefinitionUpdates
+              - SecurityUpdates
+            log_path: c:\{{ ansible_hostname }}_{{ ansible_date_time.date }}.log
+            reboot: no
+            #reboot_timeout: 300

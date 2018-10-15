@@ -13,11 +13,6 @@
         name: "{{ sshd_package_name }}"
         state: latest
 
--   name: "Update libssl"
-    package:
-        name: "{{ libssl_package_name }}"
-        state: latest
-
 -   name: "Configuring sshd"
     template:
         src: sshd_config.j2
@@ -37,7 +32,7 @@
 -   name: "Update root key"
     authorized_key:
         user: root
-        key: "{{ ssh_public_key }}\n{{ authorized_keys }}"
+        key: "{{ ssh_public_key }}\n{{ authorized_keys | default('')}}"
         exclusive: yes
 
  

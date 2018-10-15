@@ -1,0 +1,22 @@
+---
+  - name: Search for  Windows Updates on Servers
+    hosts: windowstest
+    connection: winrm
+   
+    
+    tasks:
+        - name: Install Updates 
+          win_updates:
+            category_names:
+              - CriticalUpdates
+              - DefinitionUpdates
+              - SecurityUpdates
+            log_path: c:\{{ ansible_hostname }}_{{ ansible_date_time.date }}.log
+            reboot: yes
+            reboot_timeout: 600
+
+        - name: Collect the logs
+          fetch:
+            src: c:\{{ ansible_hostname }}_{{ ansible_date_time.date }}.log
+            dest: /srv/ansible/logs/
+            flat: yes
