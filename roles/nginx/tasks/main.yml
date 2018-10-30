@@ -1,0 +1,128 @@
+---
+- name: Enable HTTP via firewalld
+  firewalld:
+      zone: public
+      service: http
+      permanent: yes
+      state: enabled
+
+- name: Enable HTTPS via firewalld
+  firewalld:
+      zone: public
+      service: https
+      permanent: yes
+      state: enabled
+
+- name: Update firewalld
+  systemd:
+      name: firewalld
+      state: reloaded
+
+- name: Add SELinux management library for Ansible
+  yum:
+      name:
+        - libsemanage-python
+      state: present
+  when: ansible_os_family == 'RedHat'
+
+- name: Update SELinux httpd_can_network_relay
+  seboolean:
+      name: httpd_can_network_relay
+      persistent: yes
+      state: yes
+
+- name: Update SELinux httpd_can_network_connect
+  seboolean:
+      name: httpd_can_network_connect
+      persistent: yes
+      state: yes
+
+- name: CentOS nginx packages
+  yum:
+      name: 
+        - nginx
+        - nginx-module-lua-epel
+      state: present
+  when: ansible_os_family == 'RedHat'
+
+- name: CentOS Signal Sciences repository
+  yum_repository:
+      name: sigsci_release
+      description: Signal Sciences agent/modules
+      baseurl: https://yum.signalsciences.net/release/el/7/$basearch
+      enabled: 1
+      gpgkey: https://yum.signalsciences.net/gpg.key
+      sslverify: 1
+      gpgcheck: 0
+      repo_gpgcheck: 0
+  when: ansible_os_family == 'RedHat'
+
+- name: CentOS Signal Sciences packages
+  yum:
+      name:
+        - sigsci-agent
+        - sigsci-module-nginx
+      state: present
+  when: ansible_os_family == 'RedHat'
+
+- name: Signal Sciences config file
+  template:
+      src: ../templates/sigsci_agent.conf.j2
+      dest: /etc/sigsci/agent.conf
+      owner: root
+      group: root
+      mode: 0644
+
+- name: Signal Sciences agent
+  systemd:
+      name: sigsci-agent
+      enabled: yes
+      masked: no
+      state: started
+
+- name: Add nginx cache path
+  file:
+      path: '/var/cache/nginx'
+      state: directory
+      mode: 644
+      owner: nginx
+      group: nginx
+
+- name: Add nginx directories
+  file:
+      path: '/etc/nginx/{{ item.path }}'
+      state: directory
+      mode: '{{ item.mode }}'
+      owner: root
+      group: root
+  with_filetree: ../templates/nginx
+  when: item.state == 'directory'
+
+- name: Add nginx base configuration
+  template:
+      src: '{{ item.src }}'
+      dest: '/etc/nginx/{{ item.path }}'
+      mode: '{{ item.mode }}'
+      owner: root
+      group: root
+  with_filetree: ../templates/nginx
+  when: item.state == 'file'
+
+- name: Add nginx injected configuration
+  copy:
+      dest: '/etc/nginx/{{ item.key }}'
+      content: '{{ item.value }}'
+      owner: root
+      group: root
+  with_dict: '{{ nginx_includes }}'
+
+- name: Test nginx config
+  command: nginx -t
+
+- name: Reload nginx service
+  systemd:
+      name: nginx
+      enabled: yes
+      state: reloaded
+      masked: no
+
