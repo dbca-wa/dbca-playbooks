@@ -2,3 +2,4 @@
 *.log
 #ignore retry files
 *.retry
+*.swp

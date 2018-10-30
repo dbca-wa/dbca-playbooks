@@ -1,6 +1,0 @@
----
-- hosts: build
-  roles:
-  - common
-  - snmp
-  - postfix

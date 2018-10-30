@@ -18,13 +18,6 @@
       name: firewalld
       state: reloaded
 
-- name: Add SELinux management library for Ansible
-  yum:
-      name:
-        - libsemanage-python
-      state: present
-  when: ansible_os_family == 'RedHat'
-
 - name: Update SELinux httpd_can_network_relay
   seboolean:
       name: httpd_can_network_relay
@@ -107,6 +100,11 @@
       group: root
   with_filetree: ../templates/nginx
   when: item.state == 'file'
+
+- name: Add latest certbot certificates
+  copy:
+      dest: '/etc/nginx/certs/'
+      src: '/etc/letsencrypt/live/'
 
 - name: Add nginx injected configuration
   copy:
