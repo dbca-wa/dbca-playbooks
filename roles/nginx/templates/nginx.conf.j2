@@ -1,7 +1,7 @@
 worker_processes 4;
 pid /var/run/nginx.pid;
-load_module /usr/lib64/nginx/modules/ndk_http_module.so;
-load_module /usr/lib64/nginx/modules/ngx_http_lua_module.so;
+load_module {{ nginx_sigsci_module }};
+load_module {{ nginx_http_module }};
 
 events {
     worker_connections 1500;

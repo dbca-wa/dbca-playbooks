@@ -19,8 +19,10 @@ server {
         return 301 $scheme://{{ server.get('redirect') }}$request_uri;
     }
     {% else %}{% for l in server.get('locations', []) %}
-    location {{ l['path'] }} { {% for rule in l['rules'] %}
-        {{ rule }}{% if rule[-1] not in [';', '}'] %};{% endif %}{% endfor %}
+    location {{ l['path'] }} { 
+    {% for rule in l['rules'] %}
+        {{ rule }}{% if rule[-1] not in [';', '}'] %};{% endif %}
+    {% endfor %}
     }
     {% endfor %}{% endif %}
 }

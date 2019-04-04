@@ -1,0 +1,3 @@
+nginx_sigsci_module: "/usr/lib64/nginx/modules/ndk_http_module.so"
+nginx_http_module: "/usr/lib64/nginx/modules/ngx_http_lua_module.so"
+

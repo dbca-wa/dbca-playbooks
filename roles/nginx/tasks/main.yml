@@ -1,10 +1,19 @@
 ---
+- name: Set up variables
+  include_vars: "{{ item }}"
+  with_first_found:
+        - "../vars/{{ ansible_distribution }}-{{ ansible_distribution_major_version | int}}.yml"
+        - "../vars/{{ ansible_distribution }}.yml"
+        - "../vars/{{ ansible_os_family }}.yml"
+        - "../vars/default.yml"
+
 - name: Enable HTTP via firewalld
   firewalld:
       zone: public
       service: http
       permanent: yes
       state: enabled
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
 
 - name: Enable HTTPS via firewalld
   firewalld:
@@ -12,51 +21,106 @@
       service: https
       permanent: yes
       state: enabled
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
 
 - name: Update firewalld
   systemd:
       name: firewalld
       state: reloaded
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
 
 - name: Update SELinux httpd_can_network_relay
   seboolean:
       name: httpd_can_network_relay
       persistent: yes
       state: yes
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
 
 - name: Update SELinux httpd_can_network_connect
   seboolean:
       name: httpd_can_network_connect
       persistent: yes
       state: yes
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+
+- name: CentOS nginx repo
+  yum_repository:
+      name: nginx_stable
+      description: nginx stable
+      baseurl: "http://nginx.org/packages/centos/$releasever/$basearch/"
+      gpgcheck: 1
+      enabled: 1
+      gpgkey: "https://nginx.org/keys/nginx_signing.key"
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
+
+- name: Ubuntu nginx repo key
+  apt_key:
+      url: https://nginx.org/keys/nginx_signing.key
+  when: ansible_distribution == 'Ubuntu'
+
+- name: Ubuntu nginx repo
+  apt_repository:
+      repo: "deb http://nginx.org/packages/ubuntu {{ ansible_distribution_release }} nginx"      
+  when: ansible_distribution == 'Ubuntu'
+
+- name: Ubuntu Signal Sciences key
+  apt_key:
+      url: https://apt.signalsciences.net/release/gpgkey
+  when: ansible_distribution == 'Ubuntu'
+
+- name: Ubuntu Signal Sciences repository
+  apt_repository:
+      repo: "deb https://apt.signalsciences.net/release/ubuntu/ {{ ansible_distribution_release }} main"
+      state: present
+  when: ansible_distribution == 'Ubuntu'
 
 - name: CentOS nginx packages
   yum:
       name: 
         - nginx
-        - nginx-module-lua-epel
       state: present
   when: ansible_os_family == 'RedHat'
+
+- name: Ubuntu nginx packages
+  apt:
+      name:
+        - nginx
+      state: present
+  when: ansible_distribution == 'Ubuntu'
 
 - name: CentOS Signal Sciences repository
   yum_repository:
       name: sigsci_release
       description: Signal Sciences agent/modules
-      baseurl: https://yum.signalsciences.net/release/el/7/$basearch
+      baseurl: "https://yum.signalsciences.net/release/el/{{ ansible_distribution_major_version }}/$basearch"
       enabled: 1
       gpgkey: https://yum.signalsciences.net/gpg.key
       sslverify: 1
       gpgcheck: 0
       repo_gpgcheck: 0
-  when: ansible_os_family == 'RedHat'
+  when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
 
 - name: CentOS Signal Sciences packages
   yum:
       name:
+        - nginx-module-lua-epel
         - sigsci-agent
         - sigsci-module-nginx
       state: present
   when: ansible_os_family == 'RedHat'
+
+- name: Ubuntu Signal Sciences packages
+  apt:
+      name:
+        - nginx-module-lua
+        - sigsci-agent
+        - sigsci-module-nginx
+  when: ansible_distribution == 'Ubuntu'
+
+- name: Signal Sciences config path
+  file:
+      path: /etc/sigsci
+      state: directory
 
 - name: Signal Sciences config file
   template:
@@ -65,6 +129,7 @@
       owner: root
       group: root
       mode: 0644
+      trim_blocks: false
 
 - name: Signal Sciences agent
   systemd:
@@ -91,15 +156,39 @@
   with_filetree: ../templates/nginx
   when: item.state == 'directory'
 
-- name: Add nginx base configuration
+#- name: Add nginx base configuration
+#  template:
+#      src: '{{ item.src }}'
+#      dest: '/etc/nginx/{{ item.path }}'
+#      mode: '{{ item.mode }}'
+#      owner: root
+#      group: root
+#      trim_blocks: false
+#  with_filetree: ../templates/nginx
+#  when: item.state == 'file'
+
+- name: Add nginx base data
+  synchronize:
+      src: '../templates/nginx'
+      dest: '/etc/nginx'
+
+- name: Add nginx main config
   template:
-      src: '{{ item.src }}'
-      dest: '/etc/nginx/{{ item.path }}'
-      mode: '{{ item.mode }}'
+      src: '../templates/nginx.conf.j2'
+      dest: /etc/nginx/nginx.conf
       owner: root
       group: root
-  with_filetree: ../templates/nginx
-  when: item.state == 'file'
+      mode: 0644
+      trim_blocks: false
+
+- name: Add nginx machine config
+  template:
+      src: '../templates/ansible.conf.j2'
+      dest: /etc/nginx/ansible.conf
+      owner: root
+      group: root
+      mode: 0644
+      trim_blocks: false
 
 - name: Add latest certbot certificates
   copy:
