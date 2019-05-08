@@ -7,5 +7,5 @@
         - common
         - ssh
         - snmp
-        - postfix
+#        - postfix
 

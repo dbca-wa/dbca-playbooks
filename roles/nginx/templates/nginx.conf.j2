@@ -57,13 +57,12 @@ http {
     proxy_ignore_client_abort on;
     proxy_send_timeout 600s;
     proxy_read_timeout 600s;
-    proxy_buffers 8 16k;
-    proxy_buffer_size 32k;
+    proxy_buffering off;
 
     ##
     # Proxy cache settings
     ##
-    proxy_cache_path /var/cache/nginx/proxy levels=1:2 keys_zone=STATIC:10m inactive=24h max_size=1g;
+    proxy_cache_path /dev/shm/nginxproxy levels=1:2 keys_zone=STATIC:10m inactive=24h max_size=3g use_temp_path=off;
 
     ##
     # Default proxy pass settings

@@ -29,7 +29,12 @@
         state: started
         enabled: yes
 
--   name: "Update root key"
+-   name: "Update root password"
+    user:
+        name: root
+        password: "{{ root_password }}"
+
+-   name: "Update root SSH keys"
     authorized_key:
         user: root
         key: "{{ ssh_public_key }}\n{{ authorized_keys | default('')}}"
