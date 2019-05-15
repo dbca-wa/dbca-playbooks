@@ -25,7 +25,7 @@ cert_suffixes = [x for x in os.listdir(CERT_PATH) if os.path.isdir(os.path.join(
 y_output = {'nginx_ssl': {}}
 for d in domains:
     for suffix in cert_suffixes:
-        if d.endswith('.{}'.format(suffix)):
+        if (d == suffix) or d.endswith('.{}'.format(suffix)):
             y_output['nginx_ssl'][d] = suffix
             break
     if d not in y_output['nginx_ssl']:

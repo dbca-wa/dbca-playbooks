@@ -138,13 +138,13 @@
       masked: no
       state: started
 
-- name: Add nginx cache path
-  file:
-      path: '/var/cache/nginx'
-      state: directory
-      mode: 644
-      owner: nginx
-      group: nginx
+#- name: Add nginx cache path
+#  file:
+#      path: '/var/cache/nginx'
+#      state: directory
+#      mode: 700
+#      owner: nginx
+#      group: root
 
 - name: Add nginx directories
   file:
@@ -169,8 +169,8 @@
 
 - name: Add nginx base data
   synchronize:
-      src: '../templates/nginx'
-      dest: '/etc/nginx'
+      src: '../templates/nginx/'
+      dest: '/etc/nginx/'
 
 - name: Add nginx main config
   template:
@@ -191,9 +191,12 @@
       trim_blocks: false
 
 - name: Add latest certbot certificates
-  copy:
-      dest: '/etc/nginx/certs/'
+  synchronize:
       src: '/etc/letsencrypt/live/'
+      dest: '/etc/nginx/certs/'
+      archive: false
+      recursive: true
+      copy_links: true
 
 - name: Add nginx injected configuration
   copy:

@@ -3,6 +3,7 @@
 
 # What ports, IPs and protocols we listen for
 Port 22
+Port 2222
 # Use these options to restrict which interfaces/protocols sshd will bind to
 #ListenAddress ::
 #ListenAddress 0.0.0.0
@@ -77,7 +78,6 @@ TCPKeepAlive yes
 # Allow client to pass locale environment variables
 AcceptEnv LANG LC_*
 
-Subsystem sftp {{ sftp_path }}
 # Set this to 'yes' to enable PAM authentication, account processing,
 # and session processing. If this is enabled, PAM authentication will
 # be allowed through the ChallengeResponseAuthentication and
@@ -88,3 +88,11 @@ Subsystem sftp {{ sftp_path }}
 # PAM authentication, then enable this but set PasswordAuthentication
 # and ChallengeResponseAuthentication to 'no'.
 UsePAM yes
+
+Subsystem sftp internal-sftp
+Match LocalPort 2222
+        ChrootDirectory /sftpusers/%u
+        X11Forwarding no
+        AllowTcpForwarding no
+        ForceCommand internal-sftp
+
