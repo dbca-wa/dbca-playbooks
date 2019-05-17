@@ -43,6 +43,22 @@
       state: yes
   when: ansible_distribution == 'CentOS' or ansible_distribution == 'Red Hat Enterprise Linux'
 
+- name: Add rsyslog config
+  template:
+      src: ../templates/rsyslog.conf.j2
+      dest: /etc/rsyslog.d/21-nginx.conf
+      owner: root
+      group: root
+      mode: 0644
+      trim_blocks: false
+
+- name: Update rsyslog
+  systemd:
+      name: rsyslog
+      enabled: yes
+      state: restarted
+      masked: no
+
 - name: CentOS nginx repo
   yum_repository:
       name: nginx_stable

@@ -1,0 +1,25 @@
+$ModLoad imfile
+	$InputFilePollInterval 10 
+	$WorkDirectory /var/spool/rsyslog
+	$PrivDropToGroup adm
+
+	# nginx access file:
+	$InputFileName /var/log/nginx/access.log
+	$InputFileTag nginx-access:
+	$InputFileStateFile stat-nginx-access
+	$InputFileSeverity info
+	$InputFilePersistStateInterval 20000
+	$InputRunFileMonitor
+
+	#nginx Error file: 
+	$InputFileName /var/log/nginx/error.log
+	$InputFileTag nginx-error:
+	$InputFileStateFile stat-nginx-error
+	$InputFileSeverity error
+	$InputFilePersistStateInterval 20000
+	$InputRunFileMonitor
+
+	if $programname == 'nginx-access' then {{ nginx_rsyslog_target }}
+	if $programname == 'nginx-access' then stop
+	if $programname == 'nginx-error' then {{ nginx_rsyslog_target }} 
+	if $programname == 'nginx-error' then stop
