@@ -1,0 +1,2 @@
+# Use the certbot admin container on https://rks.dbca.wa.gov.au in the nginx-ingress project, nginx namespace to add certs like below
+certbot certonly --dns-cloudflare --dns-cloudflare-credentials /etc/letsencrypt/cloudflare.ini -d rottnestisland.com -d *.rottnestisland.com
