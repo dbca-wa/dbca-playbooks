@@ -1,7 +1,0 @@
----
-- hosts: build
-  roles:
-  - common
-  - smb
-  - fileserver
-
