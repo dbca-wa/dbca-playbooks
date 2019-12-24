@@ -1,12 +1,4 @@
 ---
-- name: Set up variables
-  include_vars: "{{ item }}"
-  with_first_found:
-        - "../vars/{{ ansible_distribution }}-{{ ansible_distribution_major_version | int}}.yml"
-        - "../vars/{{ ansible_distribution }}.yml"
-        - "../vars/{{ ansible_os_family }}.yml"
-        - "../vars/default.yml"
-
 - name: Signal Sciences config path
   file:
       path: /etc/nginx/sigsci
@@ -35,15 +27,6 @@
   synchronize:
       src: '../templates/nginx/'
       dest: '/etc/nginx/'
-
-- name: Add nginx main config
-  template:
-      src: '../templates/nginx.conf.j2'
-      dest: /etc/nginx/nginx.conf
-      owner: root
-      group: root
-      mode: 0644
-      trim_blocks: false
 
 - name: Add nginx machine config
   template:

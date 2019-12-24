@@ -12,4 +12,4 @@ pushd /etc/ansible; git commit -am 'updated nginx rules'; popd
 
 # run the nginx playbook
 ansible-playbook nginxlocal.yml
-
+pushd /etc/nginx; ./deploy.sh; popd

@@ -13,8 +13,8 @@ server {
     {% for address in server.get('allow', []) %}
     allow           {{ address }};{% endfor %}
     {% if 'redirect' in server %}
-    listen *:80;
-    listen *:443 ssl;
+    listen *:80 proxy_protocol;
+    listen *:443 ssl proxy_protocol;
     location / {
         return 301 $scheme://{{ server.get('redirect') }}$request_uri;
     }
