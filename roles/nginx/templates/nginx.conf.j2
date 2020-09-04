@@ -68,6 +68,12 @@ http {
     proxy_cache_path /dev/shm/nginxproxy levels=1:2 keys_zone=STATIC:10m inactive=24h max_size=3g use_temp_path=off;
 
     ##
+    # Request limit settings
+    ##
+    limit_req_zone $server_name zone=parks:10m rate=30r/s;
+    limit_req_zone $server_name zone=uat:10m rate=45r/s;
+
+    ##
     # Default proxy pass settings
     ##
     proxy_pass_header  Set-Cookie;

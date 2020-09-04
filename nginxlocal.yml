@@ -1,7 +1,0 @@
--   hosts: nginxlocal
-    strategy: free
-    gather_facts: yes
-    connection: local
-    roles:
-        - nginxlocal
-

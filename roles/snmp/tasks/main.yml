@@ -1,12 +1,3 @@
----
-- name: Install snmpd package (CentOS)
-  yum: name=net-snmp state=latest
-  when: ansible_os_family == "RedHat"
-
-- name: Install snmpd package (Debian)
-  apt: name=snmpd state=latest
-  when: ansible_os_family == "Debian"
-
 - name: Template snmpd.conf
   template: src=/srv/ansible/roles/snmp/templates/etc-snmp-snmpd-conf.j2 dest=/etc/snmp/snmpd.conf owner=root group=root mode=644 backup=yes
 
@@ -16,9 +7,3 @@
     enabled: yes
     state: restarted
 
-- name: add snmp allow to firewalld
-  firewalld: 
-    service: snmp
-    permanent: true
-    state: enabled
-  when: ansible_os_family == "RedHat"

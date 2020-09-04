@@ -1,7 +1,6 @@
 ---
 -   hosts: linux
     strategy: free
-    gather_facts: yes
     connection: ssh
     roles:
         - common
